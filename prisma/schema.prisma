@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  first_name  String?
+  last_name  String?
+  address  String?
+  phone_number  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  orders Order[]
+  reviews ProductReview[]
+  sellerRatings SellerRating[]
+  wishlist Wishlist[]
+  activity ActivityLog[]
+  shipmentAddress ShipmentAddress[]
+  images UserImage?
+}
+
+model UserImage {
+  id    Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int @unique
+  path String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Product {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  description  String?
+  price  Int?
+  stock  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  categories ProdutsOnProductCategory[]
+  detail DetailOrder[]
+  reviews ProductReview[]
+  wishlist Wishlist[]
+  images ProductImage[]
+}
+
+model ProductImage {
+  id    Int     @id @default(autoincrement())
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  Int
+  path String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model ProdutsOnProductCategory {
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  Int
+  productCategory    ProductCategory    @relation(fields: [productCategoryId], references: [id])
+  productCategoryId  Int
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  @@id([productId, productCategoryId])
+}
+
+model ProductCategory {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  icon_path String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  products ProdutsOnProductCategory[]
+}
+
+model Order {
+  id    Int     @id @default(autoincrement())
+  order_date  DateTime?
+  status  Int?
+  customer    User    @relation(fields: [customerId], references: [id])
+  customerId  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  detail DetailOrder[]
+  payment Payment?
+  shipment Shipment?
+}
+
+model DetailOrder {
+  id    Int     @id @default(autoincrement())
+  order    Order    @relation(fields: [orderId], references: [id])
+  orderId  Int
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  Int
+  total  Int?
+  subTotal  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model PaymentMethod {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  icon_path String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  payment Payment[]
+}
+
+model Payment {
+  id    Int     @id @default(autoincrement())
+  order    Order    @relation(fields: [orderId], references: [id])
+  orderId  Int @unique
+  paymentMethod    PaymentMethod    @relation(fields: [paymentId], references: [id])
+  paymentId  Int
+  paymentDate  DateTime?
+  totalPayment  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model ProductReview {
+  id    Int     @id @default(autoincrement())
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  Int
+  user    User    @relation(fields: [userID], references: [id])
+  userID  Int
+  rating  Int?
+  comment  String?
+  date  DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  images ProductReviewImage[]
+}
+
+model ProductReviewImage {
+  id    Int     @id @default(autoincrement())
+  productReview    ProductReview    @relation(fields: [productReviewId], references: [id])
+  productReviewId  Int
+  path String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+
+model SellerRating {
+  id    Int     @id @default(autoincrement())
+  seller    Seller    @relation(fields: [sellerId], references: [id])
+  sellerId  Int
+  user    User    @relation(fields: [userID], references: [id])
+  userID  Int
+  rating  Int?
+  comment  String?
+  date  DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Seller{
+  id    Int     @id @default(autoincrement())
+  name  String?
+  address  String?
+  email  String? @unique
+  phoneNumber  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ratings SellerRating[]
+  images SelerImage[]
+}
+
+model SelerImage {
+  id    Int     @id @default(autoincrement())
+  seller    Seller    @relation(fields: [sellerId], references: [id])
+  sellerId  Int
+  path String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Wishlist{
+  id    Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userID], references: [id])
+  userID  Int
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  Int
+  date  DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model ActivityLog{
+  id    Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userID], references: [id])
+  userID  Int
+  action String
+  dateLog  DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Shipment{
+  id    Int     @id @default(autoincrement())
+  order    Order    @relation(fields: [orderID], references: [id])
+  orderID  Int @unique
+  shipment_method String
+  date  DateTime?
+  status  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model ShipmentAddress{
+  id    Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userID], references: [id])
+  userID  Int
+  address String
+  city String
+  province String
+  postalCode String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+

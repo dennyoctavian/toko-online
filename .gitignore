@@ -1,0 +1,7 @@
+node_modules
+# Keep environment variables out of version control
+.env
+/public/images/product-reviews/*
+/public/images/products/*
+/public/images/sellers/*
+/public/images/users/*
